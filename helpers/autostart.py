@@ -18,6 +18,8 @@ def has_write_permission(folder_path):
 # Добавление файла в автозагрузку
 def add_to_startup(file_path, startup_path=os.path.expandvars(r'%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup')):
     if has_write_permission(startup_path):
+        file_path = file_path.replace('.py', '.exe')
+
         shutil.copy(file_path, startup_path)
         return f"Файл '{file_path}' успешно добавлен в автозагрузку."
     else:

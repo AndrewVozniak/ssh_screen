@@ -10,7 +10,7 @@ main.py``
 
 # **2. USAGE**
 ``cd dist`` </br>
-``./main --username USERNAME --password PASSWORD --server_ip SERVER_IP --token BOT_TOKEN --secret_phrase SECRET_PHRASE --user_id USER_ID``
+``./main --username USERNAME --password PASSWORD --server_ip SERVER_IP --token BOT_TOKEN --secret_phrase SECRET_PHRASE``
 
 # **3. BOT INSTRUCTION**
 Send phrase to bot and bot will send you information about your server. </br>

