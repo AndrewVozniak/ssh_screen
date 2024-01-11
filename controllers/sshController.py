@@ -36,7 +36,7 @@ class sshController:
                         print(f"Connecting to {self.server_ip}")
                         self.client.connect(hostname=self.server_ip, username=self.username, password=self.password,
                                             timeout=conf['timeout'])
-                        print(f"Connected    to {self.server_ip}")
+                        print(f"Connected to {self.server_ip}")
                         self.port = i  # Устанавливаем порт после успешного подключения
 
                         transport = self.client.get_transport()
@@ -44,14 +44,14 @@ class sshController:
 
                         channel = transport.open_channel(
                             "direct-tcpip",
-                            (self.server_ip, self.port),
+                            (self.server_ip, 22),
                             ("localhost", self.port)
                         )
 
                         self.credentials_ok = True
                         break
                     except Exception as e:
-                        print(f"Connection failed on port {i}: {e}")
+                        print(f"Connection failed: {e}")
 
         else:
             try:
@@ -65,7 +65,7 @@ class sshController:
 
                 channel = transport.open_channel(
                     "direct-tcpip",
-                    (self.server_ip, self.port),
+                    (self.server_ip, 22),
                     ("localhost", self.port)
                 )
 
