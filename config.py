@@ -9,7 +9,7 @@ server_config = {
 bot_config = {
     "token": "token", # токен
     "secret_phrase": "subscribeSSHScreen", # фраза для подписки на бота
-    "user_id": "123" # автоматически заполняется после подписки пользователя
+    "user_id": None # автоматически заполняется после подписки пользователя
 }
 
 system_data = {

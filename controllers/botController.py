@@ -23,7 +23,11 @@ def handle_text(message):
 
 
 def send_message_to_all_users(message):
-    bot.send_message(bot_config['user_id'], message)
+    if bot_config['user_id'] is not None:
+        bot.send_message(bot_config['user_id'], message)
+
+    else:
+        print('User id is None')
 
 
 def start_bot():
