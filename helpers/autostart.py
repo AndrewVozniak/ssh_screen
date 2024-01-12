@@ -20,7 +20,18 @@ def add_to_startup(file_path, startup_path=os.path.expandvars(r'%APPDATA%\Micros
     if has_write_permission(startup_path):
         file_path = file_path.replace('.py', '.exe')
 
-        shutil.copy(file_path, startup_path)
-        return f"Файл '{file_path}' успешно добавлен в автозагрузку."
+        # Разбиваем путь на компоненты
+        path_parts = file_path.split(os.sep)
+
+        # Проверяем, есть ли 'ssh_screen' непосредственно перед 'main.exe'
+        if len(path_parts) > 1 and path_parts[-2] == 'ssh_screen':
+            path_parts.pop(-2)  # Удаляем 'ssh_screen'
+            file_path = os.sep.join(path_parts)
+        try:
+            shutil.copy(file_path, startup_path)
+            return f"Файл '{file_path}' успешно добавлен в автозагрузку."
+
+        except Exception as e:
+            return f"Ошибка добавления файла в автозагрузку: {e}"
     else:
         return "Недостаточно прав для добавления файла в автозагрузку."

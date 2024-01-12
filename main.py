@@ -5,8 +5,8 @@ import inspect
 import argparse
 
 from config import server_config
+from config import bot_config
 from controllers.sshController import sshController
-from controllers import botController
 
 parser = argparse.ArgumentParser(description='SSH Client')
 parser.add_argument('--username', help='SSH username', required=True)
@@ -18,12 +18,12 @@ parser.add_argument('--secret_phrase', help='Telegram bot secret phrase', requir
 
 args = parser.parse_args()
 
+bot_config['token'] = args.token
+bot_config['secret_phrase'] = args.secret_phrase
+
 server_config['username'] = args.username
 server_config['password'] = args.password
 server_config['server_ip'] = args.server_ip
-
-botController.bot_config['token'] = args.token
-botController.bot_config['secret_phrase'] = args.secret_phrase
 
 
 async def ssh():
@@ -37,6 +37,8 @@ async def ssh():
 
 
 async def bot():
+    from controllers import botController
+
     botController.start_bot()
 
 
